@@ -30,9 +30,9 @@ If the following files are present in the current folder these will be used:
 
 The hosts file is optimized so that it will try and reduce the number of entries to block.  Given the following blocking host entries it will produce a single entry (example.com):
 
-127.0.0.1	www.example.com
-127.0.0.1	ftp.example.com
-127.0.0.1	example.com
+	127.0.0.1	www.example.com
+	127.0.0.1	ftp.example.com
+	127.0.0.1	example.com
 
 Any non blocking entries will be transferred without the optimization applied.
 
