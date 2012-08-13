@@ -10,3 +10,14 @@
 *.lai
 *.la
 *.a
+_ReSharper.*
+Debug/
+*.opensdf
+*.user
+HostsMergeCmd/hosts.download
+*.suo
+*.sdf
+*.lnt
+*.ipch
+Visual Lint/*
+HostsMergeCmd/wpad.dat
