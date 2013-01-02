@@ -23,11 +23,18 @@ namespace
         "http://someonewhocares.org/hosts/hosts",
 		"http://pgl.yoyo.org/adservers/serverlist.php?showintro=0;hostformat=hosts",
 
-        //"http://support.it-mate.co.uk/downloads/hosts.txt",
+		"http://hosts-file.net/download/hosts.txt",
+		"http://www.malwaredomainlist.com/hostslist/hosts.txt",
+
+		//"http://support.it-mate.co.uk/downloads/hosts.txt",
 
         //"http://hosts-file.malwareteks.com/hosts.txt",
         // "http://everythingisnt.com/hosts",
+
         
+
+		// not a hosts file - just domain per line
+		// http://mirror1.malwaredomains.com/files/immortal_domains.txt
 		
     };
 
