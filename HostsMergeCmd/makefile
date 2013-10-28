@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -g -O3 -Wall -fomit-frame-pointer -mcpu=arm926ej-s 
+CFLAGS = -g -O3 -Wall -fomit-frame-pointer -mcpu=arm926ej-s -std=c++0x
 OBJECTS = Hosts.o HostsMergeCmd.o LoadHostsFile.o OutputHostsFile.o OutputWpad.o PackedIPAddress.o stdafx.o
 
 HostsMergeCmd.exe : $(OBJECTS)

@@ -19,7 +19,7 @@
 #include <fstream>
 #include <sstream>
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || GCC_VERSION > 40600
 
 #include <unordered_map>
 #include <unordered_set>
