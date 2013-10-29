@@ -20,6 +20,10 @@
 #include <sstream>
 
 #if defined(_MSC_VER) || GCC_VERSION > 40600
+#define UNORDERED_MAP_AVAILABLE 1
+#endif
+
+#if defined (UNORDERED_MAP_AVAILABLE)
 
 #include <unordered_map>
 #include <unordered_set>

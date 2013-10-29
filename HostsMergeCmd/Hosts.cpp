@@ -20,8 +20,11 @@ namespace
             return false;
         }
 
-        std::string sNameToRemove( "." );
-        sNameToRemove += f_nametoremove;
+		std::string sNameToRemove;
+		sNameToRemove.reserve(f_nametoremove.size() + 1 );
+
+		sNameToRemove.append(".");
+		sNameToRemove.append(f_nametoremove);
 
         char const * const pEnd = f_existingname.c_str() + ( f_existingname.size() - sNameToRemove.size() );
 
@@ -59,7 +62,7 @@ namespace
     
     __checkReturn IPAddressMap::iterator RemoveItemAndMoveToNext( __in IPAddressMap & f_cache, __in IPAddressMap::iterator const & f_item )
     {
-#if defined(_MSC_VER)
+#if defined (UNORDERED_MAP_AVAILABLE)
         return f_cache.erase( f_item );
 #else
         IPAddressMap::iterator next(f_item);
