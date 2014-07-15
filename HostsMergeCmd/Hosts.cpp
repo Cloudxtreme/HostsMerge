@@ -84,17 +84,24 @@ namespace
 #endif
 	}
 
+	__checkReturn bool IsSubDomain( __in std::string const & subDomainCandidate, __in std::string const & parentDomainCandidate )
+	{
+		return EndsWith( subDomainCandidate, parentDomainCandidate );
+	}
+
 	__checkReturn bool IsSubdomainOfBlockedEntry( __in std::string const & searchFor, __in DomainNames const & setDomainNames, __in DomainNames::const_iterator const & itEndDomain )
 	{
+		assert( !IsSubDomain( searchFor, "64happy1000loans.com" ) );
+
 		std::string const reverseSearchTerm( reverse( searchFor ) );
 
-		DomainNames::const_iterator itLower(setDomainNames.lower_bound( reverseSearchTerm ));
+		DomainNames::const_iterator itLower( setDomainNames.lower_bound( reverseSearchTerm ) );
 
-		while( itLower != itEndDomain && ( *itLower == reverseSearchTerm || EndsWith( reverse( *itLower ), searchFor ) ) )
+		while( itLower != itEndDomain && ( *itLower == reverseSearchTerm || IsSubDomain( searchFor, reverse( *itLower ) ) ) )
 		{
-			if( EndsWith( reverse( *itLower ), searchFor ) )
+			if( IsSubDomain( searchFor, reverse( *itLower ) ) )
 			{
-				std::cout << "  ++ Removing " << searchFor << " as it matches " << reverse( *itLower ) << std::endl;
+				std::cout << "  ++ Removing " << searchFor << " as it is a subdomain of " << reverse( *itLower ) << std::endl;
 				return true;
 			}
 
@@ -177,6 +184,8 @@ void RemoveMatchingEntries(
 
 void OptimizeHosts( __inout IPAddressMap & f_cache)
 {
+	assert( IsSubDomain( "test.64happy1000loans.com", "64happy1000loans.com" ) );
+
 	std::cout << "Optimizing Entries...." << std::endl;
 
 	size_t itemsRemoved(0);
