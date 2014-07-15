@@ -2,15 +2,15 @@
 
 #include "PackedIPAddress.h"
 
-class reverse_name_comparer
-{
-public:
-	bool operator()( std::string const & lhs, std::string const & rhs);
-};
+//class reverse_name_comparer
+//{
+//public:
+//	bool operator()( std::string const & lhs, std::string const & rhs);
+//};
 
 typedef std::unordered_multimap< PackedIP, std::string > IPAddressMap;
 
-typedef std::set< std::string, reverse_name_comparer > DomainNames;
+typedef std::set< std::string > DomainNames;
 
 __checkReturn DomainNames ExtractUniqueDomainNames(
     __in IPAddressMap const & f_cache );

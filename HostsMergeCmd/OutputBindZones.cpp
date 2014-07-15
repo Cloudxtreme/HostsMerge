@@ -39,7 +39,7 @@ void SaveBindZones(
         
         std::stringstream ss;
 
-		foutf << "zone \"" << domain << "\"{  type master; file \"/etc/bind/null.zone.file\"; } };" << std::endl;
+		foutf << "zone \"" << domain << "\"{ type master; notify no; file \"/etc/bind/null.zone.file\"; };" << std::endl;
     }
     foutf << std::endl;
 }

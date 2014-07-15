@@ -21,3 +21,9 @@ HostsMergeCmd/hosts.download
 *.ipch
 Visual Lint/*
 HostsMergeCmd/wpad.dat
+HostsMergeCmd/hosts.bad
+HostsMergeCmd/hosts.cache
+HostsMergeCmd/named.conf.banned
+HostsMergeCmd/Release/*
+Release/HostsMergeCmd.exe.lastcodeanalysissucceeded
+Release/*
