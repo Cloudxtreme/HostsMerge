@@ -89,23 +89,103 @@ namespace
 		return EndsWith( subDomainCandidate, parentDomainCandidate );
 	}
 
-	__checkReturn bool IsSubdomainOfBlockedEntry( __in std::string const & searchFor, __in DomainNames const & setDomainNames, __in DomainNames::const_iterator const & itEndDomain )
+	__checkReturn bool IsPotentialSiblingOPrarentDomain( __in std::string const & subdomainCandidate, __in std::string const & parentDomainCandidate ) 
 	{
-		assert( !IsSubDomain( searchFor, "64happy1000loans.com" ) );
+		std::size_t maxLength = std::min( subdomainCandidate.size(), parentDomainCandidate.size() );
 
-		std::string const reverseSearchTerm( reverse( searchFor ) );
-
-		DomainNames::const_iterator itLower( setDomainNames.lower_bound( reverseSearchTerm ) );
-
-		while( itLower != itEndDomain && ( *itLower == reverseSearchTerm || IsSubDomain( searchFor, reverse( *itLower ) ) ) )
+		std::size_t pos(0);
+		while( pos < maxLength )
 		{
-			if( IsSubDomain( searchFor, reverse( *itLower ) ) )
+			if( subdomainCandidate[pos] != parentDomainCandidate[pos] )
 			{
-				std::cout << "  ++ Removing " << searchFor << " as it is a subdomain of " << reverse( *itLower ) << std::endl;
-				return true;
+				if( pos == 0 )
+				{
+					return false;
+				}
+
+				if( std::count( subdomainCandidate.cbegin(), subdomainCandidate.cbegin() + pos - 1, '.' ) > 1 )
+				{
+					// matched up to last period
+					return true;
+				}
 			}
 
-			++itLower;
+			++pos;
+		}
+
+		if( std::count( subdomainCandidate.cbegin(), subdomainCandidate.cbegin() + pos - 1, '.' ) > 1 )
+		{
+			// matched up to last period
+			return true;
+		}
+
+		return false;
+	}
+
+	void OutputSubdomainMatch( __in std::string const & subdomain, __in std::string const & parentDomain )
+	{
+		std::cout << "  ++ Removing " << subdomain << " as it is a subdomain of " << parentDomain << std::endl;
+	}
+
+	__checkReturn bool IsSubdomainOfBlockedEntry( __in std::string const & searchFor, __in DomainNames const & setDomainNames, __in DomainNames::const_iterator const & itStartDomain, __in DomainNames::const_iterator const & itEndDomain )
+	{
+		std::string const reverseSearchTerm( reverse( searchFor ) );
+
+		DomainNames::const_iterator const itLower( setDomainNames.lower_bound( reverseSearchTerm ) );
+		if( itLower == itEndDomain )
+		{
+			// not found
+			return false;
+		}
+
+		// Search Before Current Record
+		DomainNames::const_iterator itItem( itLower); 
+		do
+		{
+			if( *itItem != reverseSearchTerm )
+			{
+				std::string const reversedItem( reverse( *itItem ) );
+				if( IsSubDomain( searchFor, reversedItem ) )
+				{
+					OutputSubdomainMatch( searchFor, reversedItem );
+					return true;
+				}
+
+				if( !IsPotentialSiblingOPrarentDomain( reverseSearchTerm, reversedItem ) )
+				{
+					break;
+				}
+			}
+
+			if( itItem == itStartDomain )
+			{
+				break;
+			}
+
+			--itItem;
+		}
+		while( true  );
+
+		// look for subsequent records
+		itItem = itLower;
+		while( itItem != itEndDomain )
+		{
+			if( *itItem != reverseSearchTerm )
+			{
+				std::string const reversedItem( reverse( *itItem ) );
+				if( IsSubDomain( searchFor, reversedItem ) )
+				{
+					OutputSubdomainMatch( searchFor, reversedItem );
+					return true;
+				}
+
+				if( !IsPotentialSiblingOPrarentDomain( reverseSearchTerm, reversedItem ) )
+				{
+					break;
+				}
+			}
+
+			++itItem;
 		}
 
 		return false;
@@ -193,15 +273,15 @@ void OptimizeHosts( __inout IPAddressMap & f_cache)
 	DomainNames const setDomainNames( OptimizeUniqueDomainNames( ExtractUniqueDomainNamesReverse( f_cache ) ) );
 
 	std::cout << "-- Removing subdomains: Start" << std::endl;
+	DomainNames::const_iterator const itStartDomain(setDomainNames.begin());
 	DomainNames::const_iterator const itEndDomain(setDomainNames.end());
-
 
 	IPAddressMap::iterator const itCacheEnd( f_cache.end() );
 
 	IPAddressMap::iterator itCacheItem( f_cache.begin() );
 	while( itCacheEnd != itCacheItem )
 	{
-		if( IsBlockedIp(itCacheItem->first) && IsSubdomainOfBlockedEntry( itCacheItem->second, setDomainNames, itEndDomain ) )
+		if( IsBlockedIp(itCacheItem->first) && IsSubdomainOfBlockedEntry( itCacheItem->second, setDomainNames, itStartDomain, itEndDomain ) )
 		{            
 			++itemsRemoved;
 			itCacheItem = RemoveItemAndMoveToNext( f_cache, itCacheItem );
