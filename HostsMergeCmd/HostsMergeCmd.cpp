@@ -7,6 +7,7 @@
 #include "LoadHostsFile.h"
 #include "OutputHostsFile.h"
 #include "OutputWpad.h"
+#include "OutputBindZones.h"
 
 
 // URLS to download hosts files?
@@ -260,6 +261,8 @@ int main(int argc, char* argv[])
         << "Verify the contents of " << szHostsCacheFile << " before overwriting your etc/hosts file." << std::endl;
 
     SaveWpadDat( allHosts, "wpad.dat", proxyUrl );
+
+	SaveBindZones( allHosts, "named.conf.banned" );
 
     return EXIT_SUCCESS;
 }

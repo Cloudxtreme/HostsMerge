@@ -104,6 +104,7 @@
     <ClCompile Include="Hosts.cpp" />
     <ClCompile Include="HostsMergeCmd.cpp" />
     <ClCompile Include="LoadHostsFile.cpp" />
+    <ClCompile Include="OutputBindZones.cpp" />
     <ClCompile Include="OutputHostsFile.cpp" />
     <ClCompile Include="OutputWpad.cpp" />
     <ClCompile Include="PackedIPAddress.cpp" />
@@ -115,6 +116,7 @@
   <ItemGroup>
     <ClInclude Include="Hosts.h" />
     <ClInclude Include="LoadHostsFile.h" />
+    <ClInclude Include="OutputBindZones.h" />
     <ClInclude Include="OutputHostsFile.h" />
     <ClInclude Include="OutputWpad.h" />
     <ClInclude Include="PackedIPAddress.h" />
