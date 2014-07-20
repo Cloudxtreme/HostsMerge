@@ -124,11 +124,28 @@ namespace
 
 	void OutputSubdomainMatch( __in std::string const & subdomain, __in std::string const & parentDomain )
 	{
-		std::cout << "  ++ Removing " << subdomain << " as it is a subdomain of " << parentDomain << std::endl;
+		// std::cout << "  ++ Removing " << subdomain << " as it is a subdomain of " << parentDomain << std::endl;
 	}
 
-	__checkReturn bool IsSubdomainOfBlockedEntry( __in std::string const & searchFor, __in DomainNames const & setDomainNames, __in DomainNames::const_iterator const & itStartDomain, __in DomainNames::const_iterator const & itEndDomain )
+	void ClearDirectMatches( __in DomainNames & setDomainNames, __in DomainNames const & setItemsToRemove )
 	{
+		DomainNames::const_iterator const itEnd( setItemsToRemove.end() );
+
+		for( DomainNames::const_iterator itItem( setItemsToRemove.begin() );
+			itEnd != itItem;
+			++itItem )
+		{
+			setDomainNames.erase( *itItem );
+		}
+	}
+
+	__checkReturn bool IsSubdomainOfBlockedEntry( __in std::string const & searchFor, __in DomainNames & setDomainNames)
+        {
+		DomainNames::const_iterator itStartDomain( setDomainNames.begin() );
+		DomainNames::const_iterator itEndDomain( setDomainNames.end() );
+
+		DomainNames setItemsToRemove;
+
 		std::string const reverseSearchTerm( reverse( searchFor ) );
 
 		DomainNames::const_iterator const itLower( setDomainNames.lower_bound( reverseSearchTerm ) );
@@ -148,6 +165,7 @@ namespace
 				if( IsSubDomain( searchFor, reversedItem ) )
 				{
 					OutputSubdomainMatch( searchFor, reversedItem );
+					ClearDirectMatches( setDomainNames, setItemsToRemove );
 					return true;
 				}
 
@@ -155,6 +173,10 @@ namespace
 				{
 					break;
 				}
+			}
+			else
+			{
+				setItemsToRemove.insert( *itItem );
 			}
 
 			if( itItem == itStartDomain )
@@ -176,6 +198,7 @@ namespace
 				if( IsSubDomain( searchFor, reversedItem ) )
 				{
 					OutputSubdomainMatch( searchFor, reversedItem );
+					ClearDirectMatches( setDomainNames, setItemsToRemove );
 					return true;
 				}
 
@@ -183,9 +206,14 @@ namespace
 				{
 					break;
 				}
-			}
 
-			++itItem;
+				++itItem;
+			}
+			else
+			{
+				setItemsToRemove.insert( *itItem );
+				++itItem;
+			}
 		}
 
 		return false;
@@ -268,37 +296,39 @@ void OptimizeHosts( __inout IPAddressMap & f_cache)
 
 	std::cout << "Optimizing Entries...." << std::endl;
 
+        size_t itemsRemovedLast(0);
 	size_t itemsRemoved(0);
 
-	DomainNames const setDomainNames( OptimizeUniqueDomainNames( ExtractUniqueDomainNamesReverse( f_cache ) ) );
+	DomainNames setDomainNames( OptimizeUniqueDomainNames( ExtractUniqueDomainNamesReverse( f_cache ) ) );
 
 	std::cout << "-- Removing subdomains: Start" << std::endl;
-	DomainNames::const_iterator const itStartDomain(setDomainNames.begin());
-	DomainNames::const_iterator const itEndDomain(setDomainNames.end());
 
 	IPAddressMap::iterator const itCacheEnd( f_cache.end() );
 
-	IPAddressMap::iterator itCacheItem( f_cache.begin() );
-	while( itCacheEnd != itCacheItem )
+	int pass(0);
+
+        do
 	{
-		if( IsBlockedIp(itCacheItem->first) && IsSubdomainOfBlockedEntry( itCacheItem->second, setDomainNames, itStartDomain, itEndDomain ) )
-		{            
-			++itemsRemoved;
-			itCacheItem = RemoveItemAndMoveToNext( f_cache, itCacheItem );
-		}
-		else
+		itemsRemovedLast = itemsRemoved;
+
+		IPAddressMap::iterator itCacheItem( f_cache.begin() );
+		while( itCacheEnd != itCacheItem )
 		{
-			++itCacheItem;
+			if( IsBlockedIp(itCacheItem->first) && IsSubdomainOfBlockedEntry( itCacheItem->second, setDomainNames ) )
+			{
+				++itemsRemoved;
+				itCacheItem = RemoveItemAndMoveToNext( f_cache, itCacheItem );
+			}
+			else
+			{
+				++itCacheItem;
+			}
 		}
+
+		std::cout << "  ++ Pass " << ++pass << " Removed " << ( itemsRemoved - itemsRemovedLast ) << " Entries." << std::endl;
 	}
+	while( itemsRemovedLast != itemsRemoved );
 
-	for( DomainNames::const_iterator itDomain( setDomainNames.begin() );
-		itEndDomain != itDomain;
-		++itDomain)
-	{
-
-
-	}
 	std::cout << "-- Removing subdomains: End" << std::endl;
 
 	std::cout << "Optimizing Complete.  Removed " << itemsRemoved << " Entries." << std::endl;
