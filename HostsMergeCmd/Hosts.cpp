@@ -135,7 +135,26 @@ namespace
 			itEnd != itItem;
 			++itItem )
 		{
-			setDomainNames.erase( *itItem );
+			bool hasShorter( false );
+			std::string itemToRemove( *itItem );
+			do
+			{
+				size_t const pos( itemToRemove.rfind( '.' ) );
+				if( std::string::npos != pos )
+				{
+					if( setDomainNames.end() != setDomainNames.find( itemToRemove ) )
+					{
+						hasShorter = true;
+						break;
+					}
+				}
+			}
+			while( std::string::npos != itemToRemove.find('.') );
+
+			if( hasShorter )
+			{
+				setDomainNames.erase( *itItem );
+			}
 		}
 	}
 
@@ -146,7 +165,7 @@ namespace
 
 		DomainNames setItemsToRemove;
 
-		std::string const searchFor( reverseSearchTerm );
+		std::string const searchFor( reverse( reverseSearchTerm ) );
 
 		DomainNames::const_iterator const itLower( setDomainNames.lower_bound( reverseSearchTerm ) );
 		if( itLower == itEndDomain )
@@ -223,21 +242,35 @@ namespace
         {
 		std::string reverseSearchTerm( reverse( searchFor ) );
 
+		//DomainNames setItemsToRemove;
+
+		int searches(0);
+
 		do
 		{
+			++searches;
+
+			//std::cout << searches << ": searching " << reverse( reverseSearchTerm ) << std::endl;
+
 			if( IsSubdomainOfBlockedEntryInternal( reverseSearchTerm, setDomainNames ) )
 			{
+				// std::cout << searches << ": matched " << reverse( reverseSearchTerm ) << std::endl;
+				//ClearDirectMatches( setDomainNames, setItemsToRemove );
+
 				return true;
 			}
 
 			size_t const pos( reverseSearchTerm.rfind( '.' ) );
 			if( std::string::npos != pos )
 			{
+				//setItemsToRemove.insert( reverseSearchTerm );
 				reverseSearchTerm.erase( pos );
 			}
 
 		}
 		while( std::string::npos != reverseSearchTerm.find( '.' ) );
+
+		//std::cout << searches << ": not matched " << searchFor << std::endl;
 
 		return false;
 	}
