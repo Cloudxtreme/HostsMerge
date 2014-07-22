@@ -139,14 +139,14 @@ namespace
 		}
 	}
 
-	__checkReturn bool IsSubdomainOfBlockedEntry( __in std::string const & searchFor, __in DomainNames & setDomainNames)
+	__checkReturn bool IsSubdomainOfBlockedEntryInternal( __in std::string const & reverseSearchTerm, __in DomainNames & setDomainNames)
         {
 		DomainNames::const_iterator itStartDomain( setDomainNames.begin() );
 		DomainNames::const_iterator itEndDomain( setDomainNames.end() );
 
 		DomainNames setItemsToRemove;
 
-		std::string const reverseSearchTerm( reverse( searchFor ) );
+		std::string const searchFor( reverseSearchTerm );
 
 		DomainNames::const_iterator const itLower( setDomainNames.lower_bound( reverseSearchTerm ) );
 		if( itLower == itEndDomain )
@@ -215,6 +215,29 @@ namespace
 				++itItem;
 			}
 		}
+
+		return false;
+	}
+
+	__checkReturn bool IsSubdomainOfBlockedEntry( __in std::string const & searchFor, __in DomainNames & setDomainNames)
+        {
+		std::string reverseSearchTerm( reverse( searchFor ) );
+
+		do
+		{
+			if( IsSubdomainOfBlockedEntryInternal( reverseSearchTerm, setDomainNames ) )
+			{
+				return true;
+			}
+
+			size_t const pos( reverseSearchTerm.rfind( '.' ) );
+			if( std::string::npos != pos )
+			{
+				reverseSearchTerm.erase( pos );
+			}
+
+		}
+		while( std::string::npos != reverseSearchTerm.find( '.' ) );
 
 		return false;
 	}
