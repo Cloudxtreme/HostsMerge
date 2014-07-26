@@ -8,7 +8,7 @@
 #include "OutputHostsFile.h"
 #include "OutputWpad.h"
 #include "OutputBindZones.h"
-
+#include "OutputPdnsdNeg.h"
 
 // URLS to download hosts files?
 // http://www.jgilmore.com/AdBin/hosts.txt
@@ -263,6 +263,7 @@ int main(int argc, char* argv[])
     SaveWpadDat( allHosts, "wpad.dat", proxyUrl );
 
 	SaveBindZones( allHosts, "named.conf.banned" );
+	SavePdnsdNeg( allHosts, "pdnsd.conf.banned" );
 
     return EXIT_SUCCESS;
 }
