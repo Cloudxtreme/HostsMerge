@@ -289,6 +289,8 @@ namespace
 		size_t removed(0);
 		size_t removedSubDomain(0);
 
+		DomainNames all( f_original );
+
                 DomainNames uniqueCleanedNames;
 
                 DomainNames::const_iterator const itEndDomain(f_original.end());
@@ -313,7 +315,8 @@ namespace
                                 domain.erase( domain.size() - webPrefix.size(), webPrefix.size() );
                         }
 
-			if( !IsSubdomainOfBlockedEntry( reverse(domain), uniqueCleanedNames ) )
+			if( !IsSubdomainOfBlockedEntry( reverse(domain), uniqueCleanedNames ) &&
+			    !IsSubdomainOfBlockedEntry( reverse(domain), all) )
 			{
                         	bool added( uniqueCleanedNames.insert( domain ).second );
 				if( !added )
