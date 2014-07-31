@@ -38,38 +38,6 @@ namespace
 		return AreEqualCaseInsensitive( pEnd, sNameToRemove.c_str() );
 	}
 
-	DomainNames OptimizeUniqueDomainNames( DomainNames const & f_original )
-	{
-		std::cout << "-- Finding Unique Domain Names: Start" << std::endl;
-
-		DomainNames uniqueCleanedNames;
-
-		DomainNames::const_iterator const itEndDomain(f_original.end());
-
-		for( DomainNames::const_iterator itDomain( f_original.begin() );
-			itEndDomain != itDomain;
-			++itDomain)
-		{
-			std::string domain(*itDomain);
-
-			// Starts with www: remove www.  Same for web.
-			if( domain.find( "www.") == 0 )
-			{
-				domain.erase(0, 4);
-			}
-			else if( domain.find( "web.") == 0 )
-			{
-				domain.erase(0, 4);
-			}
-
-			(void)uniqueCleanedNames.insert( domain );
-		}
-
-		std::cout << "-- Finding Unique Domain Names: End" << std::endl;
-
-		return uniqueCleanedNames;
-	}
-
 	__checkReturn IPAddressMap::iterator RemoveItemAndMoveToNext( __in IPAddressMap & f_cache, __in IPAddressMap::iterator const & f_item )
 	{
 #if defined (UNORDERED_MAP_AVAILABLE)
@@ -313,6 +281,60 @@ namespace
 		return ExtractUniqueDomainNamesInternal( f_cache, reverse );
 	}
 
+
+        __checkReturn DomainNames OptimizeUniqueDomainNames( DomainNames const & f_original )
+        {
+                std::cout << "-- Finding Unique Domain Names: Start" << std::endl;
+
+		size_t removed(0);
+		size_t removedSubDomain(0);
+
+                DomainNames uniqueCleanedNames;
+
+                DomainNames::const_iterator const itEndDomain(f_original.end());
+
+		std::string const wwwPrefix( reverse( "www."));
+		std::string const webPrefix( reverse( "web."));
+
+                for( DomainNames::const_iterator itDomain( f_original.begin() );
+                        itEndDomain != itDomain;
+                        ++itDomain)
+                {
+                        std::string domain(*itDomain);
+
+
+                        // Starts with www: remove www.  Same for web.
+                        if( domain.find( wwwPrefix ) == domain.size() - wwwPrefix.size() )
+                        {
+                                domain.erase(domain.size() - wwwPrefix.size(), wwwPrefix.size() );
+                        }
+                        else if( domain.find( webPrefix ) == domain.size() - webPrefix.size() )
+                        {
+                                domain.erase( domain.size() - webPrefix.size(), webPrefix.size() );
+                        }
+
+			if( !IsSubdomainOfBlockedEntry( reverse(domain), uniqueCleanedNames ) )
+			{
+                        	bool added( uniqueCleanedNames.insert( domain ).second );
+				if( !added )
+				{
+					++removed;
+				}
+			}
+			else
+			{
+				++removed;
+				++removedSubDomain;
+			}
+                }
+
+                std::cout << "-- Finding Unique Domain Names: End" << std::endl;
+		std::cout << "   -- Removed SubDomain: " << removedSubDomain << std::endl;
+		std::cout << "   -- Removed Total: " << removed << std::endl;
+		std::cout << "   -- Total: " << uniqueCleanedNames.size() << std::endl;
+
+                return uniqueCleanedNames;
+        }
 }
 
 __checkReturn DomainNames ExtractUniqueDomainNames(
